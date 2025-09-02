@@ -1,0 +1,7 @@
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\SpearPreference\bin\Win64_Shipping_Client\SpearPreference.dll
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\SpearPreference\bin\Win64_Shipping_Client\SpearPreference.pdb
+C:\source\repos\SpearPreference\SpearPreference\obj\Debug\SpearPreference.csproj.AssemblyReference.cache
+C:\source\repos\SpearPreference\SpearPreference\obj\Debug\SpearPreference.csproj.CoreCompileInputs.cache
+C:\source\repos\SpearPreference\SpearPreference\obj\Debug\SpearPre.1FF241B3.Up2Date
+C:\source\repos\SpearPreference\SpearPreference\obj\Debug\SpearPreference.dll
+C:\source\repos\SpearPreference\SpearPreference\obj\Debug\SpearPreference.pdb
