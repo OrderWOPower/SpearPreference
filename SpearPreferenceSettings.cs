@@ -8,14 +8,14 @@ namespace SpearPreference
     {
         public override string Id => "SpearPreference";
 
-        public override string DisplayName => "RBM Spear Preference Fix";
+        public override string DisplayName => "Troops Prefer Spears";
 
         public override string FolderName => "SpearPreference";
 
         public override string FormatType => "json2";
 
-        [SettingPropertyInteger("Spear Preference", 1, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference. Default is 3.")]
+        [SettingPropertyInteger("Spear Preference", 1, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference. Default is 10.")]
         [SettingPropertyGroup("Multipliers", GroupOrder = 0)]
-        public int SpearPreferenceMultiplier { get; set; } = 3;
+        public float SpearPreferenceMultiplier { get; set; } = 10;
     }
 }
