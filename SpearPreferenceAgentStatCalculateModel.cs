@@ -16,6 +16,6 @@ namespace SpearPreference
         }
 
         [HarmonyAfter(new string[] { "com.rbmcombat" })]
-        private static void Postfix(AgentDrivenProperties agentDrivenProperties) => agentDrivenProperties.AiWeaponFavorMultiplierPolearm = SpearPreferenceSettings.Instance.SpearPreferenceMultiplier;
+        private static void Postfix(AgentDrivenProperties agentDrivenProperties) => agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !Mission.Current.IsSiegeBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
     }
 }
