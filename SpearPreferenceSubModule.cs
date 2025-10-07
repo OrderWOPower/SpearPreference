@@ -1,11 +1,12 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 
 namespace SpearPreference
 {
-    // This mod makes troops prefer spears.
+    // This mod makes troops prefer spears by default.
     public class SpearPreferenceSubModule : MBSubModuleBase
     {
-        protected override void OnSubModuleLoad() => new Harmony("mod.bannerlord.spearpreference").PatchAll();
+        protected override void OnGameStart(Game game, IGameStarter gameStarterObject) => gameStarterObject.AddModel(new SpearPreferenceAgentStatCalculateModel((AgentStatCalculateModel)gameStarterObject.Models.Last(model => model is AgentStatCalculateModel)));
     }
 }
