@@ -1,4 +1,5 @@
 ﻿using TaleWorlds.Core;
+using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
 namespace SpearPreference
@@ -33,9 +34,24 @@ namespace SpearPreference
         {
             _model.UpdateAgentStats(agent, agentDrivenProperties);
 
-            if (agent.IsHuman)
+            // Exclude agents with javelins.
+            if (agent.IsHuman && !agent.Equipment.HasRangedWeapon(WeaponClass.Javelin))
             {
-                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !Mission.Current.IsSiegeBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
+                MissionWeapon weapon = agent.WieldedWeapon;
+                // Get the number of enemies who are closer than half the length of the agent's spear.
+                int nearbyEnemyCount = !weapon.IsEmpty && weapon.CurrentUsageItem.IsPolearm ? Mission.Current.GetNearbyEnemyAgentCount(agent.Team, agent.Position.AsVec2, weapon.CurrentUsageItem.GetRealWeaponLength() / 2) : 0;
+
+                if (nearbyEnemyCount == 0)
+                {
+                    // Set the agent's spear preference multiplier if there are no nearby enemies.
+                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !Mission.Current.IsSiegeBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
+                }
+                else
+                {
+                    // Decrease the agent's spear preference multiplier if there are nearby enemies.
+                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= nearbyEnemyCount * 4;
+                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
+                }
             }
         }
     }
