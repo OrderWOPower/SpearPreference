@@ -38,13 +38,14 @@ namespace SpearPreference
             if (agent.IsHuman && !agent.Equipment.HasRangedWeapon(WeaponClass.Javelin))
             {
                 MissionWeapon weapon = agent.WieldedWeapon;
+                Mission mission = Mission.Current;
                 // Get the number of enemies who are closer than half the length of the agent's spear.
-                int nearbyEnemyCount = !weapon.IsEmpty && weapon.CurrentUsageItem.IsPolearm ? Mission.Current.GetNearbyEnemyAgentCount(agent.Team, agent.Position.AsVec2, weapon.CurrentUsageItem.GetRealWeaponLength() / 2) : 0;
+                int nearbyEnemyCount = !weapon.IsEmpty && weapon.CurrentUsageItem.IsPolearm ? mission.GetNearbyEnemyAgentCount(agent.Team, agent.Position.AsVec2, weapon.CurrentUsageItem.GetRealWeaponLength() / 2) : 0;
 
                 if (nearbyEnemyCount == 0)
                 {
                     // Set the agent's spear preference multiplier if there are no nearby enemies.
-                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !Mission.Current.IsSiegeBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
+                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
                 }
                 else
                 {
