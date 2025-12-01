@@ -11,8 +11,8 @@ namespace SpearPreference
             int affectorWeaponSlotOrMissileIndex = collisionData.AffectorWeaponSlotOrMissileIndex;
             MissionWeapon weapon = affectorWeaponSlotOrMissileIndex >= 0 ? attacker.Equipment[affectorWeaponSlotOrMissileIndex] : MissionWeapon.Invalid;
 
-            // Make the attacker switch to their sidearm if they keep dealing 0 damage with their spear.
-            if (!weapon.IsEmpty && ((weapon.CurrentUsageItem.IsPolearm && collisionData.InflictedDamage == 0) || !weapon.CurrentUsageItem.IsPolearm) && attacker.Equipment.ContainsSpear() && !attacker.HasMount)
+            // Make the attacker switch to their sidearm if the victim is closer than half the length of the attacker's spear.
+            if (!weapon.IsEmpty && ((weapon.CurrentUsageItem.IsPolearm && victim != null && attacker.GetDistanceTo(victim) <= weapon.CurrentUsageItem.GetRealWeaponLength() / 2) || !weapon.CurrentUsageItem.IsPolearm) && attacker.Equipment.ContainsSpear() && !attacker.HasMount)
             {
                 attacker.UpdateAgentStats();
             }

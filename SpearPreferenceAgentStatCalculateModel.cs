@@ -1,4 +1,5 @@
-﻿using TaleWorlds.Core;
+﻿using System.Linq;
+using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
@@ -14,21 +15,45 @@ namespace SpearPreference
 
         public override float GetBreatheHoldMaxDuration(Agent agent, float baseBreatheHoldMaxDuration) => _model.GetBreatheHoldMaxDuration(agent, baseBreatheHoldMaxDuration);
 
+        public override float GetDetachmentCostMultiplierOfAgent(Agent agent, IDetachment detachment) => _model.GetDetachmentCostMultiplierOfAgent(agent, detachment);
+
         public override float GetDifficultyModifier() => _model.GetDifficultyModifier();
 
         public override float GetDismountResistance(Agent agent) => _model.GetDismountResistance(agent);
 
+        public override float GetEffectiveArmorEncumbrance(Agent agent, Equipment equipment) => _model.GetEffectiveArmorEncumbrance(agent, equipment);
+
+        public override float GetEffectiveMaxHealth(Agent agent) => _model.GetEffectiveMaxHealth(agent);
+
+        public override int GetEffectiveSkill(Agent agent, SkillObject skill) => _model.GetEffectiveSkill(agent, skill);
+
+        public override int GetEffectiveSkillForWeapon(Agent agent, WeaponComponentData weapon) => _model.GetEffectiveSkillForWeapon(agent, weapon);
+
+        public override float GetEnvironmentSpeedFactor(Agent agent) => _model.GetEnvironmentSpeedFactor(agent);
+
         public override float GetEquipmentStealthBonus(Agent agent) => _model.GetEquipmentStealthBonus(agent);
+
+        public override float GetInteractionDistance(Agent agent) => _model.GetInteractionDistance(agent);
 
         public override float GetKnockBackResistance(Agent agent) => _model.GetKnockBackResistance(agent);
 
         public override float GetKnockDownResistance(Agent agent, StrikeType strikeType = StrikeType.Invalid) => _model.GetKnockDownResistance(agent, strikeType);
 
+        public override float GetMaxCameraZoom(Agent agent) => _model.GetMaxCameraZoom(agent);
+
+        public override string GetMissionDebugInfoForAgent(Agent agent) => _model.GetMissionDebugInfoForAgent(agent);
+
         public override float GetSneakAttackMultiplier(Agent agent, WeaponComponentData weapon) => _model.GetSneakAttackMultiplier(agent, weapon);
 
         public override float GetWeaponDamageMultiplier(Agent agent, WeaponComponentData weapon) => _model.GetWeaponDamageMultiplier(agent, weapon);
 
+        public override float GetWeaponInaccuracy(Agent agent, WeaponComponentData weapon, int weaponSkill) => _model.GetWeaponInaccuracy(agent, weapon, weaponSkill);
+
+        public override bool HasHeavyArmor(Agent agent) => _model.HasHeavyArmor(agent);
+
         public override void InitializeAgentStats(Agent agent, Equipment spawnEquipment, AgentDrivenProperties agentDrivenProperties, AgentBuildData agentBuildData) => _model.InitializeAgentStats(agent, spawnEquipment, agentDrivenProperties, agentBuildData);
+
+        public override void InitializeMissionEquipment(Agent agent) => _model.InitializeMissionEquipment(agent);
 
         public override void UpdateAgentStats(Agent agent, AgentDrivenProperties agentDrivenProperties)
         {
@@ -38,20 +63,29 @@ namespace SpearPreference
             if (agent.IsHuman && !agent.Equipment.HasRangedWeapon(WeaponClass.Javelin))
             {
                 MissionWeapon weapon = agent.WieldedWeapon;
-                Mission mission = Mission.Current;
-                // Get the number of enemies who are closer than half the length of the agent's spear.
-                int nearbyEnemyCount = !weapon.IsEmpty && weapon.CurrentUsageItem.IsPolearm ? mission.GetNearbyEnemyAgentCount(agent.Team, agent.Position.AsVec2, weapon.CurrentUsageItem.GetRealWeaponLength() / 2) : 0;
 
-                if (nearbyEnemyCount == 0)
+                if (!weapon.IsEmpty)
                 {
-                    // Set the agent's spear preference multiplier if there are no nearby enemies.
-                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
-                }
-                else
-                {
-                    // Decrease the agent's spear preference multiplier if there are nearby enemies.
-                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= nearbyEnemyCount * 4;
-                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
+                    Mission mission = Mission.Current;
+                    // Get the number of dismounted enemies who are closer than half the length of the agent's spear.
+                    int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, weapon.CurrentUsageItem.GetRealWeaponLength() / 2, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
+                    // Get the number of mounted enemies who are closer than 50m.
+                    int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
+
+                    if (!weapon.CurrentUsageItem.IsPolearm)
+                    {
+                        // Set the agent's spear preference multiplier.
+                        agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
+                    }
+                    else
+                    {
+                        if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
+                        {
+                            // Decrease the agent's spear preference multiplier if there are more dismounted enemies than mounted enemies nearby.
+                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 5;
+                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
+                        }
+                    }
                 }
             }
         }
