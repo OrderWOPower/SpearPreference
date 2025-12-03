@@ -14,7 +14,7 @@ namespace SpearPreference
 
         public override string FormatType => "json2";
 
-        [SettingPropertyInteger("Non-Siege/Naval Spear Preference", 0, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference in non-siege/naval battles. Default is 10.")]
+        [SettingPropertyInteger("Non-Siege/Non-Naval Spear Preference", 0, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference in non-siege/non-naval battles. Default is 10.")]
         [SettingPropertyGroup("Multipliers", GroupOrder = 0)]
         public int NonSiegeSpearPreferenceMultiplier { get; set; } = 10;
 
