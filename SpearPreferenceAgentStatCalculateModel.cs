@@ -59,8 +59,7 @@ namespace SpearPreference
         {
             _model.UpdateAgentStats(agent, agentDrivenProperties);
 
-            // Exclude agents with ranged weapons.
-            if (agent.IsHuman && !agent.Equipment.HasRangedWeapon())
+            if (agent.IsHuman)
             {
                 MissionWeapon weapon = agent.WieldedWeapon;
 
@@ -83,6 +82,12 @@ namespace SpearPreference
                         agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 5;
                         agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
                     }
+                }
+
+                if (agentDrivenProperties.AiWeaponFavorMultiplierPolearm > 1)
+                {
+                    // Ensure that the agent always prefers ranged weapons first over spears.
+                    agentDrivenProperties.AiWeaponFavorMultiplierRanged = agentDrivenProperties.AiWeaponFavorMultiplierPolearm + 1;
                 }
             }
         }
