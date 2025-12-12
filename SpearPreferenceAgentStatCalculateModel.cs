@@ -61,41 +61,57 @@ namespace SpearPreference
 
             if (agent.IsHuman)
             {
-                MissionWeapon weapon = agent.WieldedWeapon;
+                bool hasNonJavelinSpear = false;
 
-                if (!weapon.IsEmpty)
+                for (EquipmentIndex index = EquipmentIndex.WeaponItemBeginSlot; index < EquipmentIndex.ExtraWeaponSlot; index++)
                 {
-                    Mission mission = Mission.Current;
+                    MissionWeapon weapon = agent.Equipment[index];
 
-                    if (!mission.IsSiegeBattle && !mission.IsNavalBattle)
+                    if (!weapon.IsEmpty && !weapon.HasAnyUsageWithWeaponClass(WeaponClass.Javelin) && weapon.CurrentUsageItem.IsPolearm)
                     {
-                        // Get the number of dismounted enemies who are closer than half the length of the agent's spear.
-                        int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, weapon.CurrentUsageItem.GetRealWeaponLength() / 2, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
-                        // Get the number of mounted enemies who are closer than 50m.
-                        int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
-
-                        if (!weapon.CurrentUsageItem.IsPolearm || nearbyDismountedEnemyCount <= nearbyMountedEnemyCount)
-                        {
-                            // Set the agent's spear preference multiplier.
-                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm = SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier;
-                        }
-                        else if (weapon.CurrentUsageItem.IsPolearm && nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
-                        {
-                            // Decrease the agent's spear preference multiplier if there are more dismounted enemies than mounted enemies nearby.
-                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 5;
-                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
-                        }
-                    }
-                    else
-                    {
-                        agentDrivenProperties.AiWeaponFavorMultiplierPolearm = SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
+                        hasNonJavelinSpear = true;
                     }
                 }
 
-                if (agentDrivenProperties.AiWeaponFavorMultiplierPolearm > 1)
+                // Only execute if the agent has a spear which is not also a javelin.
+                if (hasNonJavelinSpear)
                 {
-                    // Ensure that the agent always prefers ranged weapons first over spears.
-                    agentDrivenProperties.AiWeaponFavorMultiplierRanged = agentDrivenProperties.AiWeaponFavorMultiplierPolearm + 1;
+                    MissionWeapon wieldedWeapon = agent.WieldedWeapon;
+
+                    if (!wieldedWeapon.IsEmpty)
+                    {
+                        Mission mission = Mission.Current;
+
+                        if (!mission.IsSiegeBattle && !mission.IsNavalBattle)
+                        {
+                            // Get the number of dismounted enemies who are closer than half the length of the agent's spear.
+                            int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, wieldedWeapon.CurrentUsageItem.GetRealWeaponLength() / 2, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
+                            // Get the number of mounted enemies who are closer than 50m.
+                            int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
+
+                            if (!wieldedWeapon.CurrentUsageItem.IsPolearm || nearbyDismountedEnemyCount <= nearbyMountedEnemyCount)
+                            {
+                                // Set the agent's spear preference multiplier.
+                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier;
+                            }
+                            else if (wieldedWeapon.CurrentUsageItem.IsPolearm && nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
+                            {
+                                // Decrease the agent's spear preference multiplier if there are more dismounted enemies than mounted enemies nearby.
+                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 5;
+                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
+                            }
+                        }
+                        else
+                        {
+                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm = SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
+                        }
+
+                        if (agentDrivenProperties.AiWeaponFavorMultiplierPolearm > 1)
+                        {
+                            // Ensure that the agent always prefers ranged weapons first over spears.
+                            agentDrivenProperties.AiWeaponFavorMultiplierRanged = agentDrivenProperties.AiWeaponFavorMultiplierPolearm + 1;
+                        }
+                    }
                 }
             }
         }
