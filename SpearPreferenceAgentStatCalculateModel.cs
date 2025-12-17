@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
@@ -73,17 +74,16 @@ namespace SpearPreference
                     }
                 }
 
-                // Only execute if the agent has a spear which is not also a javelin.
+                // Execute only if the agent has a spear which is not also a javelin.
                 if (hasNonJavelinSpear)
                 {
                     MissionWeapon wieldedWeapon = agent.WieldedWeapon;
 
                     if (!wieldedWeapon.IsEmpty)
                     {
-                        Mission mission = Mission.Current;
-
-                        if (!mission.IsSiegeBattle && !mission.IsNavalBattle)
+                        try
                         {
+                            Mission mission = Mission.Current;
                             // Get the number of dismounted enemies who are closer than half the length of the agent's spear.
                             int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, wieldedWeapon.CurrentUsageItem.GetRealWeaponLength() / 2, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
                             // Get the number of mounted enemies who are closer than 50m.
@@ -92,7 +92,7 @@ namespace SpearPreference
                             if (!wieldedWeapon.CurrentUsageItem.IsPolearm || nearbyDismountedEnemyCount <= nearbyMountedEnemyCount)
                             {
                                 // Set the agent's spear preference multiplier.
-                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier;
+                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
                             }
                             else if (wieldedWeapon.CurrentUsageItem.IsPolearm && nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
                             {
@@ -100,16 +100,16 @@ namespace SpearPreference
                                 agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 5;
                                 agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
                             }
-                        }
-                        else
-                        {
-                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm = SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
-                        }
 
-                        if (agentDrivenProperties.AiWeaponFavorMultiplierPolearm > 1)
+                            if (agentDrivenProperties.AiWeaponFavorMultiplierPolearm > 1)
+                            {
+                                // Ensure that the agent always prefers ranged weapons first over spears.
+                                agentDrivenProperties.AiWeaponFavorMultiplierRanged = agentDrivenProperties.AiWeaponFavorMultiplierPolearm + 1;
+                            }
+                        }
+                        catch (Exception ex)
                         {
-                            // Ensure that the agent always prefers ranged weapons first over spears.
-                            agentDrivenProperties.AiWeaponFavorMultiplierRanged = agentDrivenProperties.AiWeaponFavorMultiplierPolearm + 1;
+                            InformationManager.DisplayMessage(new InformationMessage(ex.ToString()));
                         }
                     }
                 }
