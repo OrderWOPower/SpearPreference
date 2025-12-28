@@ -81,39 +81,34 @@ namespace SpearPreference
                 }
 
                 // Execute only if the agent has a spear which is not also a javelin.
-                if (hasNonJavelinSpear)
+                if (hasNonJavelinSpear && !agent.WieldedWeapon.IsEmpty)
                 {
-                    MissionWeapon wieldedWeapon = agent.WieldedWeapon;
+					try
+					{
+						Mission mission = Mission.Current;
+						SpearPreferenceSettings settings = SpearPreferenceSettings.Instance;
+						// Get the number of dismounted enemies who are closer than half the length of the agent's spear by default.
+						int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, agent.WieldedWeapon.CurrentUsageItem.GetRealWeaponLength() * settings.MaxDistanceToSwitchToSidearms, agent.Team, _agents).Count(a => !a.HasMount);
+						// Get the number of mounted enemies who are closer than 50m.
+						int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, _agents).Count(a => a.HasMount);
 
-                    if (!wieldedWeapon.IsEmpty)
-                    {
-                        try
-                        {
-                            Mission mission = Mission.Current;
-                            SpearPreferenceSettings settings = SpearPreferenceSettings.Instance;
-                            // Get the number of dismounted enemies who are closer than half the length of the agent's spear by default.
-                            int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, wieldedWeapon.CurrentUsageItem.GetRealWeaponLength() * settings.MaxDistanceToSwitchToSidearms, agent.Team, _agents).Count(a => !a.HasMount);
-                            // Get the number of mounted enemies who are closer than 50m.
-                            int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, _agents).Count(a => a.HasMount);
+						// Set the agent's spear preference multiplier.
+						agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
 
-                            // Set the agent's spear preference multiplier.
-                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
+						if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
+						{
+							// Set the agent's melee preference multiplier if there are more dismounted enemies than mounted enemies nearby.
+							agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 10;
+						}
 
-                            if (wieldedWeapon.CurrentUsageItem.IsPolearm && nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
-                            {
-                                // Set the agent's melee preference multiplier if there are more dismounted enemies than mounted enemies nearby.
-                                agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 10;
-                            }
-
-                            // Ensure that the agent always prefers ranged weapons first.
-                            agentDrivenProperties.AiWeaponFavorMultiplierRanged = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, agentDrivenProperties.AiWeaponFavorMultiplierMelee) + 1;
-                        }
-                        catch (Exception ex)
-                        {
-                            InformationManager.DisplayMessage(new InformationMessage(ex.ToString()));
-                        }
-                    }
-                }
+						// Ensure that the agent always prefers ranged weapons first.
+						agentDrivenProperties.AiWeaponFavorMultiplierRanged = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, agentDrivenProperties.AiWeaponFavorMultiplierMelee) + 1;
+					}
+					catch (Exception ex)
+					{
+						InformationManager.DisplayMessage(new InformationMessage(ex.ToString()));
+					}
+				}
             }
         }
     }
