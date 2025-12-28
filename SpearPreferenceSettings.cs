@@ -21,5 +21,9 @@ namespace SpearPreference
         [SettingPropertyInteger("Siege/Naval Spear Preference", 0, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference in siege/naval battles. Default is 1.")]
         [SettingPropertyGroup("Multipliers", GroupOrder = 0)]
         public int SiegeSpearPreferenceMultiplier { get; set; } = 1;
+
+        [SettingPropertyFloatingInteger("Maximum Distance to Switch to Sidearms", 0.0f, 1.0f, "0.0", Order = 0, RequireRestart = false, HintText = "Maximum distance to nearby enemies relative to spear length for troops to switch to sidearms. Default is 0.5.")]
+        [SettingPropertyGroup("Limits", GroupOrder = 1)]
+        public float MaxDistanceToSwitchToSidearms { get; set; } = 0.5f;
     }
 }

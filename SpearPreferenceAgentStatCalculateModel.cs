@@ -10,7 +10,13 @@ namespace SpearPreference
     {
         private readonly AgentStatCalculateModel _model;
 
-        public SpearPreferenceAgentStatCalculateModel(AgentStatCalculateModel model) => _model = model;
+        private readonly MBList<Agent> _agents;
+
+        public SpearPreferenceAgentStatCalculateModel(AgentStatCalculateModel model)
+        {
+            _model = model;
+            _agents = new MBList<Agent>();
+        }
 
         public override bool CanAgentRideMount(Agent agent, Agent targetMount) => _model.CanAgentRideMount(agent, targetMount);
 
@@ -84,28 +90,23 @@ namespace SpearPreference
                         try
                         {
                             Mission mission = Mission.Current;
-                            // Get the number of dismounted enemies who are closer than half the length of the agent's spear.
-                            int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, wieldedWeapon.CurrentUsageItem.GetRealWeaponLength() / 2, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
+                            SpearPreferenceSettings settings = SpearPreferenceSettings.Instance;
+                            // Get the number of dismounted enemies who are closer than half the length of the agent's spear by default.
+                            int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, wieldedWeapon.CurrentUsageItem.GetRealWeaponLength() * settings.MaxDistanceToSwitchToSidearms, agent.Team, _agents).Count(a => !a.HasMount);
                             // Get the number of mounted enemies who are closer than 50m.
-                            int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
+                            int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, _agents).Count(a => a.HasMount);
 
-                            if (!wieldedWeapon.CurrentUsageItem.IsPolearm || nearbyDismountedEnemyCount <= nearbyMountedEnemyCount)
+                            // Set the agent's spear preference multiplier.
+                            agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
+
+                            if (wieldedWeapon.CurrentUsageItem.IsPolearm && nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
                             {
-                                // Set the agent's spear preference multiplier.
-                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? SpearPreferenceSettings.Instance.NonSiegeSpearPreferenceMultiplier : SpearPreferenceSettings.Instance.SiegeSpearPreferenceMultiplier;
-                            }
-                            else if (wieldedWeapon.CurrentUsageItem.IsPolearm && nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
-                            {
-                                // Decrease the agent's spear preference multiplier if there are more dismounted enemies than mounted enemies nearby.
-                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm -= (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 5;
-                                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, 0f);
+                                // Set the agent's melee preference multiplier if there are more dismounted enemies than mounted enemies nearby.
+                                agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 10;
                             }
 
-                            if (agentDrivenProperties.AiWeaponFavorMultiplierPolearm > 1)
-                            {
-                                // Ensure that the agent always prefers ranged weapons first over spears.
-                                agentDrivenProperties.AiWeaponFavorMultiplierRanged = agentDrivenProperties.AiWeaponFavorMultiplierPolearm + 1;
-                            }
+                            // Ensure that the agent always prefers ranged weapons first.
+                            agentDrivenProperties.AiWeaponFavorMultiplierRanged = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, agentDrivenProperties.AiWeaponFavorMultiplierMelee) + 1;
                         }
                         catch (Exception ex)
                         {
