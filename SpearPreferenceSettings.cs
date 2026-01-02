@@ -25,5 +25,9 @@ namespace SpearPreference
         [SettingPropertyFloatingInteger("Maximum Distance to Switch to Sidearms", 0.0f, 1.0f, "0.0", Order = 0, RequireRestart = false, HintText = "Maximum distance to nearby enemies relative to spear length for troops to switch to sidearms. Default is 0.5.")]
         [SettingPropertyGroup("Limits", GroupOrder = 1)]
         public float MaxDistanceToSwitchToSidearms { get; set; } = 0.5f;
+
+        [SettingPropertyBool("Override RBM Weapon Preference", Order = 0, RequireRestart = false, HintText = "Override the weapon preference model in RBM. Enabled by default.")]
+        [SettingPropertyGroup("Realistic Battle Mod", GroupOrder = 2)]
+        public bool ShouldOverrideRbmWeaponPreference { get; set; } = true;
     }
 }

@@ -63,6 +63,7 @@ namespace SpearPreference
             if (agent.IsHuman)
             {
                 MissionWeapon spear = MissionWeapon.Invalid;
+                SpearPreferenceSettings settings = SpearPreferenceSettings.Instance;
 
                 for (EquipmentIndex index = EquipmentIndex.WeaponItemBeginSlot; index < EquipmentIndex.ExtraWeaponSlot; index++)
                 {
@@ -74,13 +75,19 @@ namespace SpearPreference
                     }
                 }
 
+                if (settings.ShouldOverrideRbmWeaponPreference)
+                {
+                    // Set the agent's spear and sidearm preference multipliers.
+                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = 1;
+                    agentDrivenProperties.AiWeaponFavorMultiplierMelee = 1;
+                }
+
                 // Execute only if the agent has a spear which is not also a javelin.
                 if (!spear.IsEmpty)
                 {
                     try
                     {
                         Mission mission = Mission.Current;
-                        SpearPreferenceSettings settings = SpearPreferenceSettings.Instance;
                         // Get the number of dismounted enemies who are closer than half the length of the agent's spear by default.
                         int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, spear.CurrentUsageItem.GetRealWeaponLength() * settings.MaxDistanceToSwitchToSidearms, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
                         // Get the number of mounted enemies who are closer than 50m.
@@ -91,7 +98,7 @@ namespace SpearPreference
 
                         if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
                         {
-                            // Set the agent's melee preference multiplier if there are more dismounted enemies than mounted enemies nearby.
+                            // Set the agent's sidearm preference multiplier if there are more dismounted enemies than mounted enemies nearby.
                             agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 10;
                         }
 
