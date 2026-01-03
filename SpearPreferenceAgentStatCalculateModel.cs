@@ -94,7 +94,7 @@ namespace SpearPreference
                         int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
 
                         // Set the agent's spear preference multiplier.
-                        agentDrivenProperties.AiWeaponFavorMultiplierPolearm = !mission.IsSiegeBattle && !mission.IsNavalBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
+                        agentDrivenProperties.AiWeaponFavorMultiplierPolearm = mission.IsFieldBattle || mission.IsSallyOutBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
 
                         if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
                         {
