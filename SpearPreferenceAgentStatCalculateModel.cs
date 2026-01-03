@@ -77,7 +77,7 @@ namespace SpearPreference
 
                 if (settings.ShouldOverrideRbmWeaponPreference)
                 {
-                    // Set the agent's spear and sidearm preference multipliers.
+                    // Reset the agent's spear and sidearm preference multipliers.
                     agentDrivenProperties.AiWeaponFavorMultiplierPolearm = 1;
                     agentDrivenProperties.AiWeaponFavorMultiplierMelee = 1;
                 }
