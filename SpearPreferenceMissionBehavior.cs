@@ -13,7 +13,7 @@ namespace SpearPreference
         {
             if (SpearPreferenceSettings.Instance.ShouldOverrideRbmWeaponPreference)
             {
-                AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type => type.Name == "PostureLogic")?.GetField("timeToUpdateAgents", BindingFlags.NonPublic | BindingFlags.Static).SetValue(null, float.PositiveInfinity);
+                AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type => type.FullName == "RBMAI.PostureLogic")?.GetField("timeToUpdateAgents", BindingFlags.NonPublic | BindingFlags.Static).SetValue(null, float.PositiveInfinity);
             }
         }
 

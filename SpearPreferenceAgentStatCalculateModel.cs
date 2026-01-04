@@ -9,8 +9,13 @@ namespace SpearPreference
     public class SpearPreferenceAgentStatCalculateModel : AgentStatCalculateModel
     {
         private readonly AgentStatCalculateModel _model;
+        private readonly Type _typeofAgentAi;
 
-        public SpearPreferenceAgentStatCalculateModel(AgentStatCalculateModel model) => _model = model;
+        public SpearPreferenceAgentStatCalculateModel(AgentStatCalculateModel model)
+        {
+            _model = model;
+            _typeofAgentAi = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type => type.FullName == "RBMAI.AgentAi");
+        }
 
         public override bool CanAgentRideMount(Agent agent, Agent targetMount) => _model.CanAgentRideMount(agent, targetMount);
 
@@ -58,12 +63,17 @@ namespace SpearPreference
 
         public override void UpdateAgentStats(Agent agent, AgentDrivenProperties agentDrivenProperties)
         {
+            SpearPreferenceSettings settings = SpearPreferenceSettings.Instance;
+
             _model.UpdateAgentStats(agent, agentDrivenProperties);
 
-            if (agent.IsHuman)
+            if (agent.IsHuman && (_typeofAgentAi == null || settings.ShouldOverrideRbmWeaponPreference))
             {
                 MissionWeapon spear = MissionWeapon.Invalid;
-                SpearPreferenceSettings settings = SpearPreferenceSettings.Instance;
+
+                // Reset the agent's spear and sidearm preference multipliers.
+                agentDrivenProperties.AiWeaponFavorMultiplierPolearm = 1;
+                agentDrivenProperties.AiWeaponFavorMultiplierMelee = 1;
 
                 for (EquipmentIndex index = EquipmentIndex.WeaponItemBeginSlot; index < EquipmentIndex.ExtraWeaponSlot; index++)
                 {
@@ -73,13 +83,6 @@ namespace SpearPreference
                     {
                         spear = weapon;
                     }
-                }
-
-                if (settings.ShouldOverrideRbmWeaponPreference)
-                {
-                    // Reset the agent's spear and sidearm preference multipliers.
-                    agentDrivenProperties.AiWeaponFavorMultiplierPolearm = 1;
-                    agentDrivenProperties.AiWeaponFavorMultiplierMelee = 1;
                 }
 
                 // Execute only if the agent has a spear which is not also a javelin.
