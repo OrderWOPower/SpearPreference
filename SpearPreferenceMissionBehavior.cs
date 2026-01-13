@@ -19,12 +19,12 @@ namespace SpearPreference
 
         public override void OnMeleeHit(Agent attacker, Agent victim, bool isCanceled, AttackCollisionData collisionData)
         {
-            if (attacker != null && attacker.IsHuman && attacker.Equipment.ContainsSpear())
+            if (attacker != null && attacker.IsHuman && attacker.HasSpearCached)
             {
                 attacker.UpdateAgentStats();
             }
 
-            if (victim != null && victim.IsHuman && victim.Equipment.ContainsSpear())
+            if (victim != null && victim.IsHuman && victim.HasSpearCached)
             {
                 victim.UpdateAgentStats();
             }
