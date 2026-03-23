@@ -102,7 +102,7 @@ namespace SpearPreference
 						if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
 						{
 							// Set the agent's sidearm preference multiplier if there are more dismounted enemies than mounted enemies nearby.
-							agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 10;
+							agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 20;
 						}
 
 						// Ensure that the agent always prefers ranged weapons first.
