@@ -91,8 +91,8 @@ namespace SpearPreference
 					try
 					{
 						Mission mission = Mission.Current;
-						// Get the number of dismounted enemies who are closer than half the length of the agent's spear by default.
-						int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, spear.CurrentUsageItem.GetRealWeaponLength() * settings.MaxDistanceToSwitchToSidearms, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
+						// Get the number of dismounted enemies who are closer than 2m by default.
+						int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, settings.MaxDistanceToSwitchToSidearms, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
 						// Get the number of mounted enemies who are closer than 50m.
 						int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
 
