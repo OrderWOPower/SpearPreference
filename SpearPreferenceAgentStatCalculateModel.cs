@@ -69,48 +69,46 @@ namespace SpearPreference
 
 			if (agent.IsHuman && (_typeofAgentAi == null || settings.ShouldOverrideRbmWeaponPreference))
 			{
-				MissionWeapon spear = MissionWeapon.Invalid;
-
 				// Reset the agent's spear and sidearm preference multipliers.
 				agentDrivenProperties.AiWeaponFavorMultiplierPolearm = 1;
 				agentDrivenProperties.AiWeaponFavorMultiplierMelee = 1;
 
-				for (EquipmentIndex index = EquipmentIndex.WeaponItemBeginSlot; index < EquipmentIndex.ExtraWeaponSlot; index++)
+				// Exclude mounted agents.
+				if (!agent.HasMount)
 				{
-					MissionWeapon weapon = agent.Equipment[index];
-
-					if (!weapon.IsEmpty && !weapon.HasAnyUsageWithWeaponClass(WeaponClass.Javelin) && weapon.CurrentUsageItem.IsPolearm && weapon.CurrentUsageItem.SwingDamageType == DamageTypes.Invalid)
+					for (EquipmentIndex index = EquipmentIndex.WeaponItemBeginSlot; index < EquipmentIndex.ExtraWeaponSlot; index++)
 					{
-						spear = weapon;
-					}
-				}
+						MissionWeapon weapon = agent.Equipment[index];
 
-				// Execute only if the agent has a spear which is not also a javelin.
-				if (!spear.IsEmpty)
-				{
-					try
-					{
-						Mission mission = Mission.Current;
-						// Get the number of dismounted enemies who are closer than 2m by default.
-						int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, settings.MaxDistanceToSwitchToSidearms, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
-						// Get the number of mounted enemies who are closer than 50m.
-						int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
-
-						// Set the agent's spear preference multiplier.
-						agentDrivenProperties.AiWeaponFavorMultiplierPolearm = mission.IsFieldBattle || mission.IsSallyOutBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
-
-						if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount)
+						// Execute only if the agent has a spear which is not also a javelin.
+						if (!weapon.IsEmpty && !weapon.HasAnyUsageWithWeaponClass(WeaponClass.Javelin) && weapon.CurrentUsageItem.IsPolearm && weapon.CurrentUsageItem.SwingDamageType == DamageTypes.Invalid)
 						{
-							// Set the agent's sidearm preference multiplier if there are more dismounted enemies than mounted enemies nearby.
-							agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 20;
-						}
+							try
+							{
+								Mission mission = Mission.Current;
+								// Get the number of dismounted enemies who are closer than 2m by default.
+								int nearbyDismountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, settings.MaxDistanceToSwitchToSidearms, agent.Team, new MBList<Agent>()).Count(a => !a.HasMount);
+								// Get the number of mounted enemies who are closer than 50m.
+								int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
 
-						// Ensure that the agent always prefers ranged weapons first.
-						agentDrivenProperties.AiWeaponFavorMultiplierRanged = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, agentDrivenProperties.AiWeaponFavorMultiplierMelee);
-					}
-					catch (Exception ex)
-					{
-						InformationManager.DisplayMessage(new InformationMessage(ex.ToString()));
+								// Set the agent's spear preference multiplier.
+								agentDrivenProperties.AiWeaponFavorMultiplierPolearm = mission.IsFieldBattle || mission.IsSallyOutBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
+
+								// Execute only if the agent is wielding a polearm.
+								if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount && !agent.WieldedWeapon.IsEmpty && agent.WieldedWeapon.CurrentUsageItem.IsPolearm)
+								{
+									// Set the agent's sidearm preference multiplier if there are more dismounted enemies than mounted enemies nearby.
+									agentDrivenProperties.AiWeaponFavorMultiplierMelee = (nearbyDismountedEnemyCount - nearbyMountedEnemyCount) * 20;
+								}
+
+								// Ensure that the agent always prefers ranged weapons first.
+								agentDrivenProperties.AiWeaponFavorMultiplierRanged = MathF.Max(agentDrivenProperties.AiWeaponFavorMultiplierPolearm, agentDrivenProperties.AiWeaponFavorMultiplierMelee);
+							}
+							catch (Exception ex)
+							{
+								InformationManager.DisplayMessage(new InformationMessage(ex.ToString()));
+							}
+						}
 					}
 				}
 			}

@@ -22,7 +22,7 @@ namespace SpearPreference
 		[SettingPropertyGroup("Multipliers", GroupOrder = 0)]
 		public int SiegeSpearPreferenceMultiplier { get; set; } = 1;
 
-		[SettingPropertyFloatingInteger("Maximum Distance to Switch to Sidearms", 0.0f, 10.0f, "0.0m", Order = 0, RequireRestart = false, HintText = "Maximum distance to nearby enemies for troops to switch to sidearms. Default is 2.0.")]
+		[SettingPropertyFloatingInteger("Maximum Distance to Switch to Sidearms", 0.0f, 10.0f, "0.0m", Order = 0, RequireRestart = false, HintText = "Maximum distance to nearby enemies for troops to switch to sidearms. Default is 2.0m.")]
 		[SettingPropertyGroup("Limits", GroupOrder = 1)]
 		public float MaxDistanceToSwitchToSidearms { get; set; } = 2.0f;
 
