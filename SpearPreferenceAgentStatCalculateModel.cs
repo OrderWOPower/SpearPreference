@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using TaleWorlds.CampaignSystem;
+using TaleWorlds.CampaignSystem.MapEvents;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
@@ -92,7 +94,30 @@ namespace SpearPreference
 								int nearbyMountedEnemyCount = mission.GetNearbyEnemyAgents(agent.Position.AsVec2, 50, agent.Team, new MBList<Agent>()).Count(a => a.HasMount);
 
 								// Set the agent's spear preference multiplier.
-								agentDrivenProperties.AiWeaponFavorMultiplierPolearm = mission.IsFieldBattle || mission.IsSallyOutBattle ? settings.NonSiegeSpearPreferenceMultiplier : settings.SiegeSpearPreferenceMultiplier;
+								if (mission.IsFieldBattle || mission.IsSallyOutBattle || mission.IsNavalRaidBattle)
+								{
+									agentDrivenProperties.AiWeaponFavorMultiplierPolearm = settings.FieldBattleSpearPreferenceMultiplier;
+								}
+								else if (mission.IsSiegeBattle)
+								{
+									agentDrivenProperties.AiWeaponFavorMultiplierPolearm = settings.SiegeBattleSpearPreferenceMultiplier;
+								}
+								else if (mission.IsNavalBattle)
+								{
+									agentDrivenProperties.AiWeaponFavorMultiplierPolearm = settings.NavalBattleSpearPreferenceMultiplier;
+								}
+								else if (MapEvent.PlayerMapEvent != null && MapEvent.PlayerMapEvent.IsHideoutBattle)
+								{
+									agentDrivenProperties.AiWeaponFavorMultiplierPolearm = settings.HideoutBattleSpearPreferenceMultiplier;
+								}
+								else if (CampaignMission.Current?.Location?.StringId == "arena")
+								{
+									agentDrivenProperties.AiWeaponFavorMultiplierPolearm = settings.ArenaBattleSpearPreferenceMultiplier;
+								}
+								else
+								{
+									agentDrivenProperties.AiWeaponFavorMultiplierPolearm = settings.OtherBattleSpearPreferenceMultiplier;
+								}
 
 								// Execute only if the agent is wielding a polearm.
 								if (nearbyDismountedEnemyCount > nearbyMountedEnemyCount && !agent.WieldedWeapon.IsEmpty && agent.WieldedWeapon.CurrentUsageItem.IsPolearm)

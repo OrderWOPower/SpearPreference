@@ -14,13 +14,29 @@ namespace SpearPreference
 
 		public override string FormatType => "json2";
 
-		[SettingPropertyInteger("Non-Siege/Non-Naval Spear Preference", 0, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference in non-siege/non-naval battles. Default is 10.")]
+		[SettingPropertyInteger("Field Battle Spear Preference", 0, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference in field battles, sally out battles and raids. Default is 10.")]
 		[SettingPropertyGroup("Multipliers", GroupOrder = 0)]
-		public int NonSiegeSpearPreferenceMultiplier { get; set; } = 10;
+		public int FieldBattleSpearPreferenceMultiplier { get; set; } = 10;
 
-		[SettingPropertyInteger("Siege/Naval Spear Preference", 0, 100, "0", Order = 0, RequireRestart = false, HintText = "Multiplier for spear preference in siege/naval battles. Default is 1.")]
+		[SettingPropertyInteger("Siege Battle Spear Preference", 0, 100, "0", Order = 1, RequireRestart = false, HintText = "Multiplier for spear preference in siege battles. Default is 1.")]
 		[SettingPropertyGroup("Multipliers", GroupOrder = 0)]
-		public int SiegeSpearPreferenceMultiplier { get; set; } = 1;
+		public int SiegeBattleSpearPreferenceMultiplier { get; set; } = 1;
+
+		[SettingPropertyInteger("Naval Battle Spear Preference", 0, 100, "0", Order = 2, RequireRestart = false, HintText = "Multiplier for spear preference in naval battles. Default is 1.")]
+		[SettingPropertyGroup("Multipliers", GroupOrder = 0)]
+		public int NavalBattleSpearPreferenceMultiplier { get; set; } = 1;
+
+		[SettingPropertyInteger("Hideout Battle Spear Preference", 0, 100, "0", Order = 3, RequireRestart = false, HintText = "Multiplier for spear preference in hideout battles. Default is 10.")]
+		[SettingPropertyGroup("Multipliers", GroupOrder = 0)]
+		public int HideoutBattleSpearPreferenceMultiplier { get; set; } = 10;
+
+		[SettingPropertyInteger("Arena Battle Spear Preference", 0, 100, "0", Order = 4, RequireRestart = false, HintText = "Multiplier for spear preference in arena battles. Default is 10.")]
+		[SettingPropertyGroup("Multipliers", GroupOrder = 0)]
+		public int ArenaBattleSpearPreferenceMultiplier { get; set; } = 10;
+
+		[SettingPropertyInteger("Other Battle Spear Preference", 0, 100, "0", Order = 5, RequireRestart = false, HintText = "Multiplier for spear preference in other battles. Default is 1.")]
+		[SettingPropertyGroup("Multipliers", GroupOrder = 0)]
+		public int OtherBattleSpearPreferenceMultiplier { get; set; } = 1;
 
 		[SettingPropertyFloatingInteger("Maximum Distance to Switch to Sidearms", 0.0f, 10.0f, "0.0m", Order = 0, RequireRestart = false, HintText = "Maximum distance to nearby enemies for troops to switch to sidearms. Default is 2.0m.")]
 		[SettingPropertyGroup("Limits", GroupOrder = 1)]
