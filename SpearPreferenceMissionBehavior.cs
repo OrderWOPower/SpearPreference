@@ -1,30 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
+﻿using HarmonyLib;
+using System;
 using TaleWorlds.MountAndBlade;
 
 namespace SpearPreference
 {
 	public class SpearPreferenceMissionBehavior : MissionBehavior
 	{
-		private readonly Type _typeofStanceLogic;
+		private readonly Type _typeofAgentAi;
 
 		public override MissionBehaviorType BehaviorType => MissionBehaviorType.Other;
 
-		public SpearPreferenceMissionBehavior()
-		{
-			_typeofStanceLogic = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type => type.FullName == "RBMAI.StanceLogic");
-
-			if (_typeofStanceLogic != null && SpearPreferenceSettings.Instance.ShouldOverrideRbmWeaponPreference)
-			{
-				// Override the interval for RBM's UpdateAgentStats call to an infinite amount of time.
-				_typeofStanceLogic.GetField("timeToUpdateAgents", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, float.PositiveInfinity);
-			}
-		}
+		public SpearPreferenceMissionBehavior() => _typeofAgentAi = AccessTools.TypeByName("RBMAI.AgentAi");
 
 		public override void OnMeleeHit(Agent attacker, Agent victim, bool isCanceled, AttackCollisionData collisionData)
 		{
-			if (_typeofStanceLogic == null || SpearPreferenceSettings.Instance.ShouldOverrideRbmWeaponPreference)
+			if (_typeofAgentAi == null || SpearPreferenceSettings.Instance.ShouldOverrideRbmWeaponPreference)
 			{
 				if (attacker != null && attacker.IsHuman && attacker.HasSpearCached)
 				{

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.MapEvents;
@@ -16,7 +17,7 @@ namespace SpearPreference
 		public SpearPreferenceAgentStatCalculateModel(AgentStatCalculateModel model)
 		{
 			_model = model;
-			_typeofAgentAi = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).FirstOrDefault(type => type.FullName == "RBMAI.AgentAi");
+			_typeofAgentAi = AccessTools.TypeByName("RBMAI.AgentAi");
 		}
 
 		public override bool CanAgentRideMount(Agent agent, Agent targetMount) => _model.CanAgentRideMount(agent, targetMount);
