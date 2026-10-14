@@ -65,7 +65,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SpearPreferenceAgentAi.cs" />
+    <Compile Include="SpearPreferenceRbmInteraction.cs" />
     <Compile Include="SpearPreferenceAgentStatCalculateModel.cs" />
     <Compile Include="SpearPreferenceMissionBehavior.cs" />
     <Compile Include="SpearPreferenceSettings.cs" />

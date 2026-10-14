@@ -1,6 +1,6 @@
-﻿using HarmonyLib;
-using System;
-using System.Linq;
+﻿using System.Linq;
+using System.Reflection;
+using HarmonyLib;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 
@@ -10,7 +10,7 @@ namespace SpearPreference
 	public class SpearPreferenceSubModule : MBSubModuleBase
 	{
 		private Harmony _harmony;
-		private Type _typeofAgentAi;
+		private MethodBase _tickWeaponPreferenceMethod, _applyWeaponPreferenceMethod;
 
 		protected override void OnSubModuleLoad() => _harmony = new Harmony("mod.bannerlord.spearpreference");
 
@@ -18,13 +18,14 @@ namespace SpearPreference
 		{
 			gameStarterObject.AddModel(new SpearPreferenceAgentStatCalculateModel((AgentStatCalculateModel)gameStarterObject.Models.Last(model => model is AgentStatCalculateModel)));
 
-			_typeofAgentAi = AccessTools.TypeByName("RBMAI.AgentAi");
+			_tickWeaponPreferenceMethod = AccessTools.Method(AccessTools.Inner(AccessTools.TypeByName("RBMAI.AgentAi"), "WeaponPreference"), "TickWeaponPreference");
+			_applyWeaponPreferenceMethod = AccessTools.Method(AccessTools.Inner(AccessTools.TypeByName("RBMAI.AgentAi"), "WeaponPreference"), "ApplyWeaponPreference");
 
 			// Check whether RBM is loaded.
-			if (_typeofAgentAi != null)
+			if (_tickWeaponPreferenceMethod != null && _applyWeaponPreferenceMethod != null)
 			{
-				_harmony.Patch(AccessTools.Method(AccessTools.Inner(_typeofAgentAi, "WeaponPreference"), "TickWeaponPreference"), prefix: new HarmonyMethod(AccessTools.Method(typeof(SpearPreferenceAgentAi), "Prefix")));
-				_harmony.Patch(AccessTools.Method(AccessTools.Inner(_typeofAgentAi, "WeaponPreference"), "ApplyWeaponPreference"), prefix: new HarmonyMethod(AccessTools.Method(typeof(SpearPreferenceAgentAi), "Prefix")));
+				_harmony.Patch(_tickWeaponPreferenceMethod, prefix: new HarmonyMethod(AccessTools.Method(typeof(SpearPreferenceRbmInteraction), "Prefix")));
+				_harmony.Patch(_applyWeaponPreferenceMethod, prefix: new HarmonyMethod(AccessTools.Method(typeof(SpearPreferenceRbmInteraction), "Prefix")));
 			}
 		}
 
@@ -32,10 +33,10 @@ namespace SpearPreference
 
 		public override void OnGameEnd(Game game)
 		{
-			if (_typeofAgentAi != null)
+			if (_tickWeaponPreferenceMethod != null && _applyWeaponPreferenceMethod != null)
 			{
-				_harmony.Unpatch(AccessTools.Method(AccessTools.Inner(_typeofAgentAi, "WeaponPreference"), "TickWeaponPreference"), AccessTools.Method(typeof(SpearPreferenceAgentAi), "Prefix"));
-				_harmony.Unpatch(AccessTools.Method(AccessTools.Inner(_typeofAgentAi, "WeaponPreference"), "ApplyWeaponPreference"), AccessTools.Method(typeof(SpearPreferenceAgentAi), "Prefix"));
+				_harmony.Unpatch(_tickWeaponPreferenceMethod, AccessTools.Method(typeof(SpearPreferenceRbmInteraction), "Prefix"));
+				_harmony.Unpatch(_applyWeaponPreferenceMethod, AccessTools.Method(typeof(SpearPreferenceRbmInteraction), "Prefix"));
 			}
 		}
 	}
